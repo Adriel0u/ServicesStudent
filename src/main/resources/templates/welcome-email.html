@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Bienvenido</title>
+</head>
+<body style="font-family: Arial, sans-serif; background:#f3f4f6; padding:24px; color:#1f2937;">
+<div style="max-width:560px; margin:0 auto; background:#ffffff; border-radius:8px; padding:32px;">
+    <h2 style="margin-top:0;">Hola, <span th:text="${fullName}">Estudiante</span> 👋</h2>
+    <p>
+        Te damos la bienvenida a <strong th:text="${platformName}">UEES Plataforma de Cursos</strong>.
+        Tu cuenta ha sido creada exitosamente.
+    </p>
+    <p>
+        Desde tu dashboard podras inscribirte en cursos, seguir tu progreso, participar en el foro y
+        recibir tus certificados al completarlos al 100%.
+    </p>
+    <p style="margin-top:24px;">
+        ¡Mucho exito en tu aprendizaje!
+    </p>
+    <hr style="border:none; border-top:1px solid #e5e7eb; margin:24px 0;"/>
+    <p style="font-size:12px; color:#6b7280;">Universidad Evangelica de El Salvador — Ingenieria de la Web</p>
+</div>
+</body>
+</html>

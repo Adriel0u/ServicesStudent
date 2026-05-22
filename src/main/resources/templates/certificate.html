@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Certificado de Finalizacion</title>
+    <style>
+        body {
+            font-family: 'Georgia', serif;
+            background: #f4f1ea;
+            margin: 0;
+            padding: 40px 20px;
+            color: #1f2937;
+        }
+        .container {
+            max-width: 760px;
+            margin: 0 auto;
+            background: #fff;
+            border: 6px double #b08d57;
+            padding: 48px 56px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+        }
+        .header { text-align: center; }
+        .platform {
+            text-transform: uppercase;
+            letter-spacing: 8px;
+            font-size: 12px;
+            color: #b08d57;
+        }
+        h1 {
+            font-size: 42px;
+            margin: 8px 0 4px;
+            color: #1f2937;
+        }
+        .subtitle {
+            font-size: 18px;
+            color: #6b7280;
+            font-style: italic;
+            margin-bottom: 32px;
+        }
+        .award { text-align: center; margin: 24px 0; font-size: 18px; color: #374151; }
+        .student-name {
+            font-size: 36px;
+            color: #b08d57;
+            font-weight: bold;
+            text-align: center;
+            margin: 12px 0;
+            border-bottom: 2px solid #b08d57;
+            display: inline-block;
+            padding: 0 24px 4px;
+        }
+        .course {
+            text-align: center;
+            font-size: 22px;
+            margin: 16px 0;
+        }
+        .course em { color: #1f2937; }
+        .meta {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 56px;
+            font-size: 13px;
+            color: #4b5563;
+        }
+        .code {
+            font-family: monospace;
+            background: #f3f4f6;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 32px;
+            font-size: 12px;
+            color: #9ca3af;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="platform" th:text="${platformName}">UEES Plataforma de Cursos</div>
+        <h1>Certificado de Finalizacion</h1>
+        <div class="subtitle">Otorgado en reconocimiento al cumplimiento academico</div>
+    </div>
+
+    <div class="award">Se certifica que</div>
+    <div style="text-align:center">
+        <span class="student-name" th:text="${studentName}">Nombre del Estudiante</span>
+    </div>
+
+    <div class="award">ha completado satisfactoriamente el curso:</div>
+    <div class="course"><em th:text="${courseName}">Nombre del Curso</em></div>
+
+    <div class="award">
+        Cumpliendo con el 100% de las lecciones y modulos requeridos.
+    </div>
+
+    <div class="meta">
+        <div>
+            <strong>Fecha de emision:</strong><br/>
+            <span th:text="${issuedAt}">1 de enero de 2026</span>
+        </div>
+        <div style="text-align:right;">
+            <strong>Codigo de verificacion:</strong><br/>
+            <span class="code" th:text="${certificateCode}">UEES-CERT-XXXX</span>
+        </div>
+    </div>
+
+    <div class="footer">
+        Universidad Evangelica de El Salvador &middot; Ingenieria de la Web &middot;
+        <span th:text="${platformName}">UEES Plataforma de Cursos</span>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,126 @@
+version: "3.9"
+
+# Compose del Grupo B (Student Services).
+# Levanta: MySQL, RabbitMQ (compartido), EspoCRM (opcional) y el servicio Spring.
+# Para integracion con Grupo A: ambos compose pueden unirse a la red 'lms-net'.
+
+networks:
+  lms-net:
+    name: lms-net
+    driver: bridge
+
+volumes:
+  mysql_student_data:
+  rabbitmq_data:
+  espocrm_db_data:
+  espocrm_data:
+
+services:
+
+  mysql-student:
+    image: mysql:8.0
+    container_name: mysql-student
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: student_db
+      MYSQL_USER: student
+      MYSQL_PASSWORD: student123
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_student_data:/var/lib/mysql
+    networks: [lms-net]
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -prootpass"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    restart: unless-stopped
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks: [lms-net]
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+
+  # ---- EspoCRM (opcional) ----
+  espocrm-db:
+    image: mysql:8.0
+    container_name: espocrm-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: espocrm
+      MYSQL_USER: espocrm
+      MYSQL_PASSWORD: espocrm123
+    volumes:
+      - espocrm_db_data:/var/lib/mysql
+    networks: [lms-net]
+
+  espocrm:
+    image: espocrm/espocrm:latest
+    container_name: espocrm
+    restart: unless-stopped
+    depends_on: [espocrm-db]
+    environment:
+      ESPOCRM_DATABASE_HOST: espocrm-db
+      ESPOCRM_DATABASE_USER: espocrm
+      ESPOCRM_DATABASE_PASSWORD: espocrm123
+      ESPOCRM_DATABASE_NAME: espocrm
+      ESPOCRM_ADMIN_USERNAME: admin
+      ESPOCRM_ADMIN_PASSWORD: admin123
+      ESPOCRM_SITE_URL: http://localhost:8082
+    ports:
+      - "8082:80"
+    volumes:
+      - espocrm_data:/var/www/html
+    networks: [lms-net]
+
+  # ---- App Spring Boot ----
+  student-services:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: uees/student-services:1.0.0
+    container_name: student-services
+    restart: unless-stopped
+    depends_on:
+      mysql-student: { condition: service_healthy }
+      rabbitmq:      { condition: service_healthy }
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      DB_URL: jdbc:mysql://mysql-student:3306/student_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      DB_USER: student
+      DB_PASSWORD: student123
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: guest
+      RABBITMQ_PASSWORD: guest
+      # Mailtrap (sobreescribir con tus credenciales en .env)
+      MAIL_HOST: ${MAIL_HOST:-sandbox.smtp.mailtrap.io}
+      MAIL_PORT: ${MAIL_PORT:-2525}
+      MAIL_USERNAME: ${MAIL_USERNAME:-changeme}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-changeme}
+      MAIL_FROM: ${MAIL_FROM:-no-reply@uees-lms.local}
+      MAIL_FROM_NAME: ${MAIL_FROM_NAME:-UEES Plataforma de Cursos}
+      # EspoCRM
+      ESPOCRM_BASE_URL: ${ESPOCRM_BASE_URL:-http://espocrm}
+      ESPOCRM_API_KEY: ${ESPOCRM_API_KEY:-changeme}
+      ESPOCRM_ENABLED: ${ESPOCRM_ENABLED:-false}
+      # Group A (learning-engine) en la misma red lms-net
+      LEARNING_ENGINE_URL: ${LEARNING_ENGINE_URL:-http://learning-engine:8080}
+      JWT_SECRET: ${JWT_SECRET:-eUVTRC1JTkdfV0VCXzIwMjZfU3VwZXJTZWNyZXRfS2V5X0F0X0xlYXN0XzMyX2J5dGVz}
+      CORS_ORIGINS: ${CORS_ORIGINS:-*}
+    ports:
+      - "8081:8081"
+    networks: [lms-net]

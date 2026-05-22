@@ -1,0 +1,82 @@
+### ============================================================
+### Student Services - Grupo B  -  pruebas REST (IntelliJ / VS Code REST Client)
+### ============================================================
+
+@host = http://localhost:8081
+@contentType = application/json
+
+### 1. Registro de estudiante
+# @name register
+POST {{host}}/api/auth/register
+Content-Type: {{contentType}}
+
+{
+  "email": "ana.lopez@uees.edu.sv",
+  "fullName": "Ana Lopez",
+  "password": "Password123!",
+  "profilePictureUrl": "https://i.pravatar.cc/200?u=ana"
+}
+
+### 2. Login
+# @name login
+POST {{host}}/api/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "ana.lopez@uees.edu.sv",
+  "password": "Password123!"
+}
+
+> {%
+client.global.set("token", response.body.accessToken);
+client.global.set("refresh", response.body.refreshToken);
+client.global.set("studentId", response.body.studentId);
+%}
+
+### 3. Refresh
+POST {{host}}/api/auth/refresh
+Content-Type: {{contentType}}
+
+{
+  "refreshToken": "{{refresh}}"
+}
+
+### 4. Dashboard
+GET {{host}}/api/dashboard
+Authorization: Bearer {{token}}
+
+### 5. Mis certificados
+GET {{host}}/api/certificates/me
+Authorization: Bearer {{token}}
+
+### 6. Listado certificados de un estudiante
+GET {{host}}/api/certificates/{{studentId}}
+Authorization: Bearer {{token}}
+
+### 7. Progreso en un curso
+GET {{host}}/api/progress/11111111-1111-1111-1111-111111111111
+Authorization: Bearer {{token}}
+
+### 8. Ranking del curso (Pageable)
+GET {{host}}/api/progress/11111111-1111-1111-1111-111111111111/ranking?page=0&size=10
+Authorization: Bearer {{token}}
+
+### 9. Publicar mensaje en el foro
+POST {{host}}/api/courses/11111111-1111-1111-1111-111111111111/forum
+Authorization: Bearer {{token}}
+Content-Type: {{contentType}}
+
+{
+  "content": "Hola comunidad, este es mi primer mensaje en el foro!"
+}
+
+### 10. Historial del foro paginado
+GET {{host}}/api/courses/11111111-1111-1111-1111-111111111111/forum?page=0&size=20
+Authorization: Bearer {{token}}
+
+### 11. Sincronizacion CRM
+POST {{host}}/api/crm/sync
+Authorization: Bearer {{token}}
+
+### 12. Swagger
+GET {{host}}/swagger-ui.html
